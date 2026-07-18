@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  ArrowRight, BarChart3, Bot, BrainCircuit, Check, ChevronRight, ChevronLeft,
+  ArrowRight, BarChart3, Bot, BrainCircuit, Check, ChevronRight,
   Clock3, Mail, Menu, MessageCircle, Phone, Send, ShieldCheck,
   Sparkles, Users, X, Zap, Play, Plus, Quote, Building2
 } from 'lucide-react'
 import logoUrl from '../images/logo2.png'
-import qrCodeUrl from '../qrcode.JPG'
 
 const PHONE = '5519991197862'
 const whatsApp = (text) => `https://wa.me/${PHONE}?text=${encodeURIComponent(text)}`
@@ -36,8 +35,50 @@ function VideoSection() {
 
 function TestimonialsSection() {
   const [current, setCurrent] = useState(0)
+  const viewportRef = useRef(null)
+  const carouselDrag = useRef(null)
   const slots = [0, 1, 2]
-  return <section className="section testimonials" aria-labelledby="testimonials-title"><div className="container"><div className="section-heading"><div><span className="kicker">Experiências reais</span><h2 id="testimonials-title">Histórias de quem usa.</h2></div><div className="carousel-controls"><button onClick={() => setCurrent((current + slots.length - 1) % slots.length)} aria-label="Depoimento anterior"><ChevronLeft/></button><button onClick={() => setCurrent((current + 1) % slots.length)} aria-label="Próximo depoimento"><ChevronRight/></button></div></div><div className="testimonial-viewport"><div className="testimonial-track" style={{ transform: `translateX(-${current * 100}%)` }}>{slots.map(slot => <article className="testimonial-card" key={slot}><Quote/><div className="testimonial-lines"><i/><i/><i/></div><div className="testimonial-person"><span><Users/></span><div><b>Depoimento em breve</b><small>Nome e empresa</small></div></div></article>)}</div></div><div className="carousel-dots" aria-hidden="true">{slots.map(slot => <i className={slot === current ? 'active' : ''} key={slot}/>)}</div></div></section>
+  const updateCurrent = (event) => setCurrent(Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth))
+  const startDrag = (event) => { event.currentTarget.setPointerCapture(event.pointerId); carouselDrag.current = { x: event.clientX, scroll: event.currentTarget.scrollLeft } }
+  const moveDrag = (event) => { if (carouselDrag.current) event.currentTarget.scrollLeft = carouselDrag.current.scroll - (event.clientX - carouselDrag.current.x) }
+  const endDrag = (event) => { carouselDrag.current = null; const page = Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth); event.currentTarget.scrollTo({ left: page * event.currentTarget.clientWidth, behavior: 'smooth' }) }
+  return <section className="section testimonials" aria-labelledby="testimonials-title"><div className="container"><div className="section-heading"><div><span className="kicker">Experiências reais</span><h2 id="testimonials-title">Histórias de quem usa.</h2></div><span className="drag-hint">Arraste para o lado</span></div><div className="testimonial-viewport" ref={viewportRef} onScroll={updateCurrent} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}><div className="testimonial-track">{slots.map(slot => <article className="testimonial-card" key={slot}><Quote/><div className="testimonial-lines"><i/><i/><i/></div><div className="testimonial-person"><span><Users/></span><div><b>Depoimento em breve</b><small>Nome e empresa</small></div></div></article>)}</div></div><div className="carousel-dots" aria-hidden="true">{slots.map(slot => <i className={slot === current ? 'active' : ''} key={slot}/>)}</div></div></section>
+}
+
+function FloatingChat() {
+  const [open, setOpen] = useState(false)
+  const [position, setPosition] = useState(null)
+  const drag = useRef(null)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('synapti-chat-position')
+    const initial = saved ? JSON.parse(saved) : { x: window.innerWidth - 80, y: window.innerHeight - 80 }
+    setPosition({ x: Math.max(12, Math.min(initial.x, window.innerWidth - 68)), y: Math.max(300, Math.min(initial.y, window.innerHeight - 68)) })
+  }, [])
+
+  const onPointerDown = (event) => {
+    event.currentTarget.setPointerCapture(event.pointerId)
+    drag.current = { startX: event.clientX, startY: event.clientY, x: position.x, y: position.y, moved: false }
+  }
+  const onPointerMove = (event) => {
+    if (!drag.current) return
+    const dx = event.clientX - drag.current.startX
+    const dy = event.clientY - drag.current.startY
+    if (Math.abs(dx) + Math.abs(dy) > 5) drag.current.moved = true
+    setPosition({ x: Math.max(12, Math.min(drag.current.x + dx, window.innerWidth - 68)), y: Math.max(300, Math.min(drag.current.y + dy, window.innerHeight - 68)) })
+  }
+  const onPointerUp = () => {
+    if (!drag.current) return
+    if (!drag.current.moved) setOpen(value => !value)
+    localStorage.setItem('synapti-chat-position', JSON.stringify(position))
+    drag.current = null
+  }
+
+  if (!position) return null
+  return <div className={`floating-chat ${position.x < 310 ? 'floating-chat--left' : ''}`} style={{ left: position.x, top: position.y }}>
+    {open && <div className="floating-chat__panel" role="dialog" aria-label="Fale com a Synapti"><button className="floating-chat__close" onClick={() => setOpen(false)} aria-label="Fechar chat"><X size={17}/></button><div className="floating-chat__avatar"><Bot size={22}/><i/></div><b>Olá! Como podemos ajudar?</b><p>Fale agora com um especialista da Synapti pelo WhatsApp.</p><a href={whatsApp('Olá! Vim pelo site da Synapti.')} target="_blank" rel="noreferrer"><MessageCircle size={18}/> Iniciar conversa</a></div>}
+    <button className="floating-chat__trigger" onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} aria-label={open ? 'Fechar atendimento' : 'Abrir atendimento'} aria-expanded={open}><MessageCircle/></button>
+  </div>
 }
 
 function FAQSection() {
@@ -209,7 +250,7 @@ function App() {
           </div>
         </section>
 
-        <section className="section live-test"><div className="container live-test__card"><div><span className="kicker">Teste ao vivo</span><h2>Não fique só na promessa.<br/>Converse com a nossa IA.</h2><p>Aponte a câmera do celular para o QR Code ou clique no botão e experimente o atendimento agora.</p><a className="button" href={whatsApp('Olá! Vim pelo site e quero testar a Synapti.')} target="_blank" rel="noreferrer"><MessageCircle size={19}/> Abrir no WhatsApp</a></div><div className="qr"><img src={qrCodeUrl} alt="QR Code para testar a Synapti no WhatsApp"/><span><i/> Atendimento online</span></div></div></section>
+        <section className="section live-test"><div className="container live-test__card live-test__card--without-qr"><div><span className="kicker">Teste ao vivo</span><h2>Não fique só na promessa.<br/>Converse com a nossa IA.</h2><p>Clique no botão e experimente agora o atendimento inteligente da Synapti pelo WhatsApp.</p><a className="button" href={whatsApp('Olá! Vim pelo site e quero testar a Synapti.')} target="_blank" rel="noreferrer"><MessageCircle size={19}/> Abrir no WhatsApp</a></div></div></section>
 
         <VideoSection />
         <TestimonialsSection />
@@ -219,7 +260,7 @@ function App() {
       </main>
 
       <footer><div className="container footer__top"><div><a className="brand brand--image" href="#inicio" aria-label="SYNAPTI — início"><img src={logoUrl} alt="" /></a><p>Conversas inteligentes.<br/>Negócios mais humanos.</p></div><div><b>Produto</b><a href="#solucao">Solução</a><a href="#como-funciona">Como funciona</a><a href="#planos">Planos</a></div><div><b>Contato</b><a href="mailto:contato@synapti.com.br">E-mail</a><a href={whatsApp('Olá! Vim pelo site da Synapti.')} target="_blank" rel="noreferrer">WhatsApp</a></div><div className="security"><ShieldCheck/><span><b>Seus dados protegidos</b><small>Segurança em cada conversa</small></span></div></div><div className="container footer__bottom"><span>© 2026 Synapti Sistemas. Todos os direitos reservados.</span><span>Feito com inteligência e propósito.</span></div></footer>
-      <a className="whatsapp-float" href={whatsApp('Olá! Vim pelo site da Synapti.')} target="_blank" rel="noreferrer" aria-label="Falar pelo WhatsApp"><MessageCircle/></a>
+      <FloatingChat />
     </div>
   )
 }
