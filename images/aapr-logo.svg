@@ -1,0 +1,29 @@
+<svg width="600" height="200" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Ícone (chip simples) -->
+  <g transform="translate(40,60)">
+    <rect x="0" y="0" width="50" height="50" rx="8" fill="#0A2540"/>
+    <circle cx="-10" cy="10" r="3" fill="#00C896"/>
+    <circle cx="-10" cy="25" r="3" fill="#00C896"/>
+    <circle cx="-10" cy="40" r="3" fill="#00C896"/>
+    <circle cx="60" cy="10" r="3" fill="#00C896"/>
+    <circle cx="60" cy="25" r="3" fill="#00C896"/>
+    <circle cx="60" cy="40" r="3" fill="#00C896"/>
+  </g>
+
+  <!-- Nome AAPR -->
+  <text x="120" y="95" font-size="48" font-family="Arial, sans-serif" fill="#0A2540" font-weight="bold">
+    AAPR
+  </text>
+
+  <!-- Subtítulo -->
+  <text x="120" y="130" font-size="20" font-family="Arial, sans-serif" fill="#333">
+    Sistemas Inteligentes
+  </text>
+
+  <!-- Slogan -->
+  <text x="120" y="160" font-size="16" font-family="Arial, sans-serif" fill="#00C896">
+    Soluções inteligentes para o seu negócio
+  </text>
+
+</svg>
