@@ -4,6 +4,8 @@ import {
   Clock3, Mail, Menu, MessageCircle, Phone, Send, ShieldCheck,
   Sparkles, Users, X, Zap, Play, Plus, Quote, Building2
 } from 'lucide-react'
+import logoUrl from '../images/logo2.png'
+import qrCodeUrl from '../qrcode.JPG'
 
 const PHONE = '5519991197862'
 const whatsApp = (text) => `https://wa.me/${PHONE}?text=${encodeURIComponent(text)}`
@@ -150,7 +152,7 @@ function App() {
           <div className="container hero__grid">
             <div className="hero__content">
               <div className="hero__identity">
-                <img className="hero__logo" src="/images/logo2.png" alt="SYNAPTI — Tecnologia, inovação e inteligência" />
+                <img className="hero__logo" src={logoUrl} alt="SYNAPTI — Tecnologia, inovação e inteligência" />
                 <div className="eyebrow"><span/> Inteligência artificial para WhatsApp</div>
               </div>
               <h1><span>Converse melhor.</span><em>Venda mais.</em></h1>
@@ -207,7 +209,7 @@ function App() {
           </div>
         </section>
 
-        <section className="section live-test"><div className="container live-test__card"><div><span className="kicker">Teste ao vivo</span><h2>Não fique só na promessa.<br/>Converse com a nossa IA.</h2><p>Aponte a câmera do celular para o QR Code ou clique no botão e experimente o atendimento agora.</p><a className="button" href={whatsApp('Olá! Vim pelo site e quero testar a Synapti.')} target="_blank" rel="noreferrer"><MessageCircle size={19}/> Abrir no WhatsApp</a></div><div className="qr"><img src="/qrcode.JPG" alt="QR Code para testar a Synapti no WhatsApp"/><span><i/> Atendimento online</span></div></div></section>
+        <section className="section live-test"><div className="container live-test__card"><div><span className="kicker">Teste ao vivo</span><h2>Não fique só na promessa.<br/>Converse com a nossa IA.</h2><p>Aponte a câmera do celular para o QR Code ou clique no botão e experimente o atendimento agora.</p><a className="button" href={whatsApp('Olá! Vim pelo site e quero testar a Synapti.')} target="_blank" rel="noreferrer"><MessageCircle size={19}/> Abrir no WhatsApp</a></div><div className="qr"><img src={qrCodeUrl} alt="QR Code para testar a Synapti no WhatsApp"/><span><i/> Atendimento online</span></div></div></section>
 
         <VideoSection />
         <TestimonialsSection />
@@ -216,7 +218,7 @@ function App() {
         <section className="section contact" id="contato"><div className="container contact__grid"><div><span className="kicker">Vamos conversar</span><h2>Pronto para transformar seu atendimento?</h2><p>Conte um pouco sobre seu negócio. Nossa equipe entra em contato para mostrar a melhor solução.</p><div className="contact__info"><a href="tel:+5519991197862"><Phone/> +55 19 99119-7862</a><a href="mailto:contato@synapti.com.br"><Mail/> contato@synapti.com.br</a></div></div><form onSubmit={sendEmail}><label>Seu nome<input name="name" placeholder="Como podemos chamar você?" required/></label><label>Seu melhor e-mail<input name="email" type="email" placeholder="voce@empresa.com" required/></label><label>Como podemos ajudar?<textarea name="message" placeholder="Conte um pouco sobre sua necessidade" required/></label><label className="consent"><input name="emailConsent" type="checkbox" required/><span>Concordo em receber comunicações da SYNAPTI por e-mail e autorizo o tratamento dos meus dados para essa finalidade, conforme a LGPD. Posso retirar meu consentimento a qualquer momento.</span></label><button className="button" type="submit">Enviar mensagem <Send size={18}/></button></form></div></section>
       </main>
 
-      <footer><div className="container footer__top"><div><a className="brand" href="#inicio"><span className="brand__mark"><Sparkles size={19}/></span>synapti<span>.</span></a><p>Conversas inteligentes.<br/>Negócios mais humanos.</p></div><div><b>Produto</b><a href="#solucao">Solução</a><a href="#como-funciona">Como funciona</a><a href="#planos">Planos</a></div><div><b>Contato</b><a href="mailto:contato@synapti.com.br">E-mail</a><a href={whatsApp('Olá! Vim pelo site da Synapti.')} target="_blank" rel="noreferrer">WhatsApp</a></div><div className="security"><ShieldCheck/><span><b>Seus dados protegidos</b><small>Segurança em cada conversa</small></span></div></div><div className="container footer__bottom"><span>© 2026 Synapti Sistemas. Todos os direitos reservados.</span><span>Feito com inteligência e propósito.</span></div></footer>
+      <footer><div className="container footer__top"><div><a className="brand brand--image" href="#inicio" aria-label="SYNAPTI — início"><img src={logoUrl} alt="" /></a><p>Conversas inteligentes.<br/>Negócios mais humanos.</p></div><div><b>Produto</b><a href="#solucao">Solução</a><a href="#como-funciona">Como funciona</a><a href="#planos">Planos</a></div><div><b>Contato</b><a href="mailto:contato@synapti.com.br">E-mail</a><a href={whatsApp('Olá! Vim pelo site da Synapti.')} target="_blank" rel="noreferrer">WhatsApp</a></div><div className="security"><ShieldCheck/><span><b>Seus dados protegidos</b><small>Segurança em cada conversa</small></span></div></div><div className="container footer__bottom"><span>© 2026 Synapti Sistemas. Todos os direitos reservados.</span><span>Feito com inteligência e propósito.</span></div></footer>
       <a className="whatsapp-float" href={whatsApp('Olá! Vim pelo site da Synapti.')} target="_blank" rel="noreferrer" aria-label="Falar pelo WhatsApp"><MessageCircle/></a>
     </div>
   )
