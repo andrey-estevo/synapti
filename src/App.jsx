@@ -29,6 +29,24 @@ const faqPlaceholders = [
   { question: 'Pergunta frequente 03', answer: 'Espaço preparado para a equipe SYNAPTI cadastrar uma resposta oficial.' },
 ]
 
+const testimonialExamples = [
+  {
+    quote: 'Antes, muitos clientes desistiam porque demorávamos para responder. Com a Synapti, o atendimento começa na hora e nossa equipe recebe o contato muito mais preparado para fechar.',
+    name: 'Mariana Costa',
+    role: 'Gestora de clínica',
+  },
+  {
+    quote: 'A automação assumiu as perguntas repetitivas e deixou nosso time livre para cuidar das negociações. Hoje conseguimos atender mais pessoas sem perder a qualidade da conversa.',
+    name: 'Rafael Martins',
+    role: 'Diretor comercial',
+  },
+  {
+    quote: 'O que mais surpreendeu foi a naturalidade das respostas. Os clientes recebem orientação mesmo fora do horário comercial e chegam até nós já sabendo qual solução procuram.',
+    name: 'Camila Oliveira',
+    role: 'Empreendedora',
+  },
+]
+
 function VideoSection() {
   return <section className="section video-section" aria-labelledby="video-title"><div className="container"><div className="center-heading"><span className="kicker">Demonstração</span><h2 id="video-title">Veja a Synapti trabalhando.</h2><p>Espaço preparado para receber o vídeo oficial da plataforma.</p></div><div className="video-placeholder"><button type="button" aria-label="Vídeo demonstrativo em breve" disabled><Play fill="currentColor"/></button><span>Vídeo demonstrativo em breve</span></div></div></section>
 }
@@ -37,12 +55,23 @@ function TestimonialsSection() {
   const [current, setCurrent] = useState(0)
   const viewportRef = useRef(null)
   const carouselDrag = useRef(null)
-  const slots = [0, 1, 2]
+  const slots = testimonialExamples
   const updateCurrent = (event) => setCurrent(Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth))
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!viewportRef.current || carouselDrag.current) return
+      setCurrent(index => {
+        const next = (index + 1) % slots.length
+        viewportRef.current.scrollTo({ left: next * viewportRef.current.clientWidth, behavior: 'smooth' })
+        return next
+      })
+    }, 5500)
+    return () => clearInterval(timer)
+  }, [slots.length])
   const startDrag = (event) => { event.currentTarget.setPointerCapture(event.pointerId); carouselDrag.current = { x: event.clientX, scroll: event.currentTarget.scrollLeft } }
   const moveDrag = (event) => { if (carouselDrag.current) event.currentTarget.scrollLeft = carouselDrag.current.scroll - (event.clientX - carouselDrag.current.x) }
   const endDrag = (event) => { carouselDrag.current = null; const page = Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth); event.currentTarget.scrollTo({ left: page * event.currentTarget.clientWidth, behavior: 'smooth' }) }
-  return <section className="section testimonials" aria-labelledby="testimonials-title"><div className="container"><div className="section-heading"><div><span className="kicker">Experiências reais</span><h2 id="testimonials-title">Histórias de quem usa.</h2></div><span className="drag-hint">Arraste para o lado</span></div><div className="testimonial-viewport" ref={viewportRef} onScroll={updateCurrent} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}><div className="testimonial-track">{slots.map(slot => <article className="testimonial-card" key={slot}><Quote/><div className="testimonial-lines"><i/><i/><i/></div><div className="testimonial-person"><span><Users/></span><div><b>Depoimento em breve</b><small>Nome e empresa</small></div></div></article>)}</div></div><div className="carousel-dots" aria-hidden="true">{slots.map(slot => <i className={slot === current ? 'active' : ''} key={slot}/>)}</div></div></section>
+  return <section className="section testimonials" aria-labelledby="testimonials-title"><div className="container"><div className="section-heading"><div><span className="kicker">Experiências de atendimento</span><h2 id="testimonials-title">Histórias que inspiram resultados.</h2></div><span className="drag-hint">Arraste para o lado</span></div><div className="testimonial-viewport" ref={viewportRef} onScroll={updateCurrent} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag}><div className="testimonial-track">{slots.map(item => <article className="testimonial-card" key={item.name}><Quote/><blockquote>“{item.quote}”</blockquote><div className="testimonial-person"><span><Users/></span><div><b>{item.name}</b><small>{item.role} · Relato ilustrativo</small></div></div></article>)}</div></div><div className="carousel-dots" aria-hidden="true">{slots.map((item, index) => <i className={index === current ? 'active' : ''} key={item.name}/>)}</div></div></section>
 }
 
 function FloatingChat() {
@@ -51,9 +80,16 @@ function FloatingChat() {
   const drag = useRef(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem('synapti-chat-position')
-    const initial = saved ? JSON.parse(saved) : { x: window.innerWidth - 80, y: window.innerHeight - 80 }
-    setPosition({ x: Math.max(12, Math.min(initial.x, window.innerWidth - 68)), y: Math.max(300, Math.min(initial.y, window.innerHeight - 68)) })
+    const clamp = (point) => ({ x: Math.max(12, Math.min(point.x, window.innerWidth - 68)), y: Math.max(12, Math.min(point.y, window.innerHeight - 80)) })
+    let initial = { x: window.innerWidth - 80, y: window.innerHeight - 92 }
+    try {
+      const saved = JSON.parse(localStorage.getItem('synapti-chat-position'))
+      if (saved?.xRatio != null) initial = { x: saved.xRatio * window.innerWidth, y: saved.yRatio * window.innerHeight }
+    } catch { localStorage.removeItem('synapti-chat-position') }
+    setPosition(clamp(initial))
+    const onResize = () => setPosition(point => point ? clamp(point) : point)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
   }, [])
 
   const onPointerDown = (event) => {
@@ -70,14 +106,14 @@ function FloatingChat() {
   const onPointerUp = () => {
     if (!drag.current) return
     if (!drag.current.moved) setOpen(value => !value)
-    localStorage.setItem('synapti-chat-position', JSON.stringify(position))
+    localStorage.setItem('synapti-chat-position', JSON.stringify({ xRatio: position.x / window.innerWidth, yRatio: position.y / window.innerHeight }))
     drag.current = null
   }
 
   if (!position) return null
-  return <div className={`floating-chat ${position.x < 310 ? 'floating-chat--left' : ''}`} style={{ left: position.x, top: position.y }}>
+  return <div className={`floating-chat ${position.x < window.innerWidth / 2 ? 'floating-chat--left' : ''} ${position.y < 330 ? 'floating-chat--top' : ''}`} style={{ left: position.x, top: position.y }}>
     {open && <div className="floating-chat__panel" role="dialog" aria-label="Fale com a Synapti"><button className="floating-chat__close" onClick={() => setOpen(false)} aria-label="Fechar chat"><X size={17}/></button><div className="floating-chat__avatar"><Bot size={22}/><i/></div><b>Olá! Como podemos ajudar?</b><p>Fale agora com um especialista da Synapti pelo WhatsApp.</p><a href={whatsApp('Olá! Vim pelo site da Synapti.')} target="_blank" rel="noreferrer"><MessageCircle size={18}/> Iniciar conversa</a></div>}
-    <button className="floating-chat__trigger" onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} aria-label={open ? 'Fechar atendimento' : 'Abrir atendimento'} aria-expanded={open}><MessageCircle/></button>
+    <button className="floating-chat__trigger" onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} aria-label={open ? 'Fechar atendimento' : 'Abrir atendimento'} aria-expanded={open}>{open ? <X/> : <MessageCircle/>}</button>
   </div>
 }
 
@@ -105,6 +141,27 @@ function AnimatedNumber({ value, suffix = '' }) {
     return () => observer.disconnect()
   }, [value])
   return <strong ref={ref}>{number.toLocaleString('pt-BR')}{suffix}</strong>
+}
+
+function TypewriterBrand() {
+  const messages = ['SYNAPTI', 'Quem responde primeiro, fecha primeiro.']
+  const [messageIndex, setMessageIndex] = useState(0)
+  const [visibleText, setVisibleText] = useState('')
+
+  useEffect(() => {
+    const message = messages[messageIndex]
+    if (visibleText.length < message.length) {
+      const timer = setTimeout(() => setVisibleText(message.slice(0, visibleText.length + 1)), messageIndex === 0 ? 130 : 58)
+      return () => clearTimeout(timer)
+    }
+    const timer = setTimeout(() => {
+      setVisibleText('')
+      setMessageIndex(index => (index + 1) % messages.length)
+    }, messageIndex === 0 ? 1200 : 2600)
+    return () => clearTimeout(timer)
+  }, [messageIndex, visibleText])
+
+  return <span className={`typewriter ${messageIndex === 1 ? 'typewriter--phrase' : ''}`} aria-hidden="true"><span>{visibleText}</span><i/></span>
 }
 
 function App() {
@@ -175,7 +232,7 @@ function App() {
       </div>
       <header className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
         <div className="container nav__inner">
-          <a className="nav__wordmark" href="#inicio" aria-label="SYNAPTI — início">SYNAPTI</a>
+          <a className="nav__wordmark" href="#inicio" aria-label="SYNAPTI — início"><TypewriterBrand /></a>
           <nav className={menuOpen ? 'nav__links nav__links--open' : 'nav__links'} aria-label="Navegação principal">
             <a href="#solucao" onClick={closeMenu}>Solução</a>
             <a href="#como-funciona" onClick={closeMenu}>Como funciona</a>
